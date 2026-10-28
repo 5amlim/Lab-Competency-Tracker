@@ -7,7 +7,7 @@ export const MARKETS = [
 export const SITES = MARKETS.flatMap(market=>market.sites);
 export const getMarket = site=>MARKETS.find(market=>market.sites.includes(site))||null;
 export const getMarketSites = marketId=>MARKETS.find(market=>market.id===marketId)?.sites||[];
-export const ROLES = ['Lab Technician', 'Lab Supervisor', 'RN', 'RN Lead', 'Medical Assistant', 'Manager', 'Other'];
+export const ROLES = ['Lab Technician', 'RN', 'RN Lead', 'Medical Assistant', 'Other'];
 export const ELEMENTS = [
   'Direct observation of routine patient testing and specimen handling',
   'Monitoring recording and reporting of patient results',
