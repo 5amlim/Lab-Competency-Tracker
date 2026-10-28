@@ -49,12 +49,15 @@ function drawCalendar(){
  popup.innerHTML='';
  const header=document.createElement('div');header.className='app-calendar-header';
  const heading=document.createElement('strong');heading.textContent=monthName(year,month);
+ const prevYear=document.createElement('button');prevYear.type='button';prevYear.className='app-calendar-nav year-jump';prevYear.setAttribute('aria-label','Previous year');prevYear.textContent='«';
  const back=document.createElement('button');back.type='button';back.className='app-calendar-nav';back.setAttribute('aria-label','Previous month');back.textContent='‹';
  const next=document.createElement('button');next.type='button';next.className='app-calendar-nav';next.setAttribute('aria-label','Next month');next.textContent='›';
+ const nextYear=document.createElement('button');nextYear.type='button';nextYear.className='app-calendar-nav year-jump';nextYear.setAttribute('aria-label','Next year');nextYear.textContent='»';
  const middle=document.createElement('div');middle.className='app-calendar-title';middle.appendChild(heading);
- header.append(back,middle,next);popup.appendChild(header);
- back.addEventListener('click',()=>{Object.assign(active,moveMonth(year,month,-1));drawCalendar();});
- next.addEventListener('click',()=>{Object.assign(active,moveMonth(year,month,1));drawCalendar();});
+ header.append(prevYear,back,middle,next,nextYear);popup.appendChild(header);
+ for(const [button,offset] of [[prevYear,-12],[back,-1],[next,1],[nextYear,12]]){
+   button.addEventListener('click',()=>{Object.assign(active,moveMonth(active.year,active.month,offset));drawCalendar();});
+ }
  const weekdays=document.createElement('div');weekdays.className='app-calendar-weekdays';
  ['S','M','T','W','T','F','S'].forEach(d=>{const span=document.createElement('span');span.textContent=d;weekdays.appendChild(span);});
  popup.appendChild(weekdays);
@@ -137,7 +140,7 @@ document.addEventListener('scroll',e=>{
 export function enhanceDates(root=document){
  closeCalendar();
  root.querySelectorAll('input[type="date"]:not([data-app-date])').forEach(input=>{
-  input.dataset.appDate='true';
+  input.dataset.appDate='true';input.tabIndex=-1;input.setAttribute('aria-hidden','true');
   const host=document.createElement('div');host.className='app-date-host';
   input.parentNode.insertBefore(host,input);host.appendChild(input);
   const trigger=document.createElement('button');trigger.type='button';trigger.className='app-date-trigger';
