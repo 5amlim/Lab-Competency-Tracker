@@ -128,7 +128,7 @@ document.addEventListener('scroll',e=>{
 export function enhanceDates(root=document){
  closeCalendar();
  root.querySelectorAll('input[type="date"]:not([data-app-date])').forEach(input=>{
-  input.dataset.appDate='true';input.tabIndex=-1;input.setAttribute('aria-hidden','true');
+  input.dataset.appDate='true';input.dataset.originalType='date';input.type='text';input.inputMode='none';input.tabIndex=-1;input.setAttribute('aria-hidden','true');
   const host=document.createElement('div');host.className='app-date-host';
   input.parentNode.insertBefore(host,input);host.appendChild(input);
   const trigger=document.createElement('button');trigger.type='button';trigger.className='app-date-trigger';
