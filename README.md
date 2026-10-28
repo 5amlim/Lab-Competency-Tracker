@@ -91,6 +91,14 @@ The site list is grouped into four markets. Each location is saved by its full s
 
 Use the market filter to narrow the site dropdown. When adding an employee, choose a market first and then a site. Pre-existing generic locations such as `Florida`, `New York`, `San Leandro`, or `Short Pump` are preserved as legacy assignments for review rather than automatically mapped to a different clinic. The original fictional demo employees are migrated to their intended named locations in local browser storage. Before connecting a real Supabase workspace, update `app_users.allowed_sites` to these exact full-site values.
 
+## Employee onboarding and site instrument presets
+
+The new-employee form has a market and site selector, then a preloaded instrument catalog for that site. The employee's individual instruments are explicitly checked before creating their competency milestones. **Site availability does not mean the employee is trained or competent.** Each checked instrument starts with pending initial training/assessment, 6-month, and annual milestones, using the entered per-employee baseline date. Add other instruments later from the employee profile.
+
+All 15 sites share the same instrument catalog except **Beverly Hills Flagship** and **Beverly Hills Satellite**, which additionally offer **BioFire TORCH**. The site-specific rule applies when adding an employee and when assigning systems later. Reference templates must still be uploaded separately.
+
+The interface uses custom site/market/test-system selectors that appear inside the website, not browser-native dropdowns. The original `select` elements remain in the DOM for validated form submission, and the menus support keyboard focus and Escape. The assessment form includes a progress indicator and a fixed action footer, while reference uploads use a styled file-picker button.
+
 ## Competency design
 
 Each *employee + test system* has its own first-testing date, selected test complexity/policy and schedule:
