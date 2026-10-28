@@ -60,7 +60,77 @@ function overview(){const m=metrics();const upcoming=[...m.aa].sort((a,b)=>a.due
 function team(){let filtered=visiblePeople().filter(p=>filterSite(p)).filter(p=>`${p.name} ${p.site} ${p.role}`.toLowerCase().includes(ui.search.toLowerCase())).filter(p=>ui.status==='All statuses'||(ui.status==='Active'&&p.status==='active')||(ui.status==='Offboarded'&&p.status==='offboarded'));const rows=filtered.sort((a,b)=>Number(a.status!=='active')-Number(b.status!=='active')||a.name.localeCompare(b.name));return `${pageHead('TEAM MANAGEMENT','Team directory','Manage access to instruments, competency timelines and offboarding.',isManager()?`<button class="button primary" data-action="add-employee">+ Add employee</button>`:'')}
 <div class="filter-bar"><div class="search-box">⌕ <input id="search" placeholder="Search employees, role or location..." value="${attr(ui.search)}" /></div>${marketSelect()}${siteSelect()}<select class="select" id="status-filter">${['All statuses','Active','Offboarded'].map(s=>`<option ${ui.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
 <section class="panel table-panel">${rows.length?`<div class="table-scroll"><table><thead><tr><th>EMPLOYEE</th><th>LOCATION</th><th>ONBOARDING</th><th>ASSIGNED SYSTEMS</th><th>STATUS</th><th></th></tr></thead><tbody>${rows.map(p=>{const ens=db.enrollments.filter(e=>e.employee_id===p.id);const tasks=ens.flatMap(linked).filter(a=>!a.completed_at&&daysUntil(a.due_date)<0);return `<tr><td><div class="row-person"><span class="initial-avatar">${initials(p.name)}</span><div><b>${esc(p.name)}</b><small>${esc(p.role)}</small></div></div></td><td>${esc(p.site)}<small class="subcell">${esc(getMarket(p.site)?.name||'Legacy location')}</small></td><td>${dateLabel(p.hire_date)}</td><td>${ens.length} systems ${tasks.length?badge(`${tasks.length} overdue`,'overdue'):''}</td><td>${p.status==='active'?badge('Active','connected'):badge((p.offboard_reason||'Offboarded'),'archived')}</td><td><button class="icon-button" data-staff="${p.id}" aria-label="Open employee">↗</button></td></tr>`}).join('')}</tbody></table></div>`:emptyState('No employees found','Try changing the search or status filters.')}</section>`;}
-function competencies(){let rows=visibleAss().filter(a=>filterSite(associated(a)||{}));rows=rows.filter(a=>{const en=getEnroll(a.enrollment_id),em=getEmp(en?.employee_id);return `${em?.name||''} ${getPlatform(en?.platform_id).name} ${a.phase}`.toLowerCase().includes(ui.search.toLowerCase())});if(ui.status!=='All statuses')rows=rows.filter(a=>{const em=associated(a),s=statusOf(a,em,db.settings.threshold);return s===({Overdue:'overdue','Due soon':'due',Completed:'complete',Scheduled:'upcoming',Archived:'archived'}[ui.status]||'notfound')});rows.sort((a,b)=>(a.completed_at?1:0)-(b.completed_at?1:0)||a.due_date.localeCompare(b.due_date));return `${pageHead('ASSESSMENT TRACKER','Competencies','Track every test system independently, with evidence for each evaluation.',`<button class="button secondary" data-nav="reminders">◷ View due items</button>`)}<div class="filter-bar"><div class="search-box">⌕ <input id="search" placeholder="Search employee or test system..." value="${attr(ui.search)}"/></div>${marketSelect()}${siteSelect()}<select class="select" id="status-filter">${['All statuses','Overdue','Due soon','Completed','Scheduled','Archived'].map(s=>`<option ${ui.status===s?'selected':''}>${s}</option>`).join('')}</select></div><section class="panel table-panel"><div class="section-head table-heading"><div><h2>Assessment records <span class="count">${rows.length}</span></h2><p>Training, initial assessment, six-month check and annual renewals</p></div></div><div class="table-scroll"><table><thead><tr><th>EMPLOYEE</th><th>TEST SYSTEM</th><th>STAGE</th><th>DUE / COMPLETED</th><th>STATUS</th><th></th></tr></thead><tbody>${rows.slice(0,300).map(rowAss).join('')}</tbody></table></div>${rows.length>300?'<div class="small-warning">Showing first 300 records. Refine filters to see more.</div>':''}${!rows.length?emptyState('No competency records','Assign a test system to an employee to populate the tracker.'):''}</section>`;}
+function compactCompetencyRow(a){
+ const enrollment=getEnroll(a.enrollment_id),employee=getEmp(enrollment?.employee_id);
+ if(!enrollment||!employee)return '';
+ const due=daysUntil(a.due_date);
+ const detail=a.completed_at?`Completed ${dateLabel(a.completed_at)}`:due<0?`${Math.abs(due)} days overdue`:due===0?'Due today':`In ${due} days`;
+ const critical=!a.completed_at&&due<0;
+ return `<tr>
+  <td><div class="comp-platform">${esc(getPlatform(enrollment.platform_id).name)}<small>${esc(getPlatform(enrollment.platform_id).group)}</small></div></td>
+  <td>${esc(phaseName(a))}</td>
+  <td><div class="comp-date">${dateLabel(a.due_date)}<small class="${critical?'danger-text':''}">${detail}</small></div></td>
+  <td>${statusBadge(a,employee)}</td>
+  <td><button type="button" class="comp-open-record" data-ass="${attr(a.id)}" aria-label="Open ${attr(getPlatform(enrollment.platform_id).name)} ${attr(phaseName(a))} for ${attr(employee.name)}">Open <span aria-hidden="true">↗</span></button></td>
+ </tr>`;
+}
+function competencies(){
+ let rows=visibleAss().filter(a=>filterSite(associated(a)||{}));
+ const needle=ui.search.trim().toLowerCase();
+ if(needle)rows=rows.filter(a=>{
+  const en=getEnroll(a.enrollment_id),em=getEmp(en?.employee_id);
+  return `${em?.name||''} ${em?.site||''} ${getPlatform(en?.platform_id).name} ${getPhase(a.phase).label}`.toLowerCase().includes(needle);
+ });
+ if(ui.status!=='All statuses')rows=rows.filter(a=>{
+  const em=associated(a),status=statusOf(a,em,db.settings.threshold);
+  return status===({Overdue:'overdue','Due soon':'due',Completed:'complete',Scheduled:'upcoming',Archived:'archived'}[ui.status]||'not-found');
+ });
+ const groups=groupAssessmentRecords(rows,getEnroll,getEmp,ui.compSort,isoToday());
+ const filterCount=Number(ui.market!=='All markets')+Number(ui.site!=='All sites')+Number(ui.status!=='All statuses')+Number(ui.compSort!=='deadline');
+ return `${pageHead('ASSESSMENT TRACKER','Competencies','Review assessment status by employee, then expand to see each assigned test system.',`<button class="button secondary" data-nav="reminders">◷ View due items</button>`)}
+ <div class="comp-toolbar">
+  <div class="search-box">⌕ <input id="search" placeholder="Search employee, test system, or assessment..." value="${attr(ui.search)}" aria-label="Search competencies"/></div>
+  <button type="button" class="button secondary comp-filter-button ${filterCount?'has-filters':''}" id="comp-filter-toggle" aria-expanded="${ui.compFilterOpen}" aria-controls="comp-filter-panel"><span aria-hidden="true">☷</span> Sort &amp; filter ${filterCount?`<span class="comp-filter-count">${filterCount}</span>`:''}<span class="comp-control-chevron" aria-hidden="true">${ui.compFilterOpen?'⌃':'⌄'}</span></button>
+ </div>
+ <div class="comp-filter-panel" id="comp-filter-panel" ${ui.compFilterOpen?'':'hidden'}>
+  <div class="comp-filter-grid">
+   <label class="field"><span>Sort employees</span><select id="comp-sort" aria-label="Sort employees">
+    ${[['deadline','Earliest pending deadline'],['overdue','Most overdue'],['name','Employee A–Z'],['site','Site A–Z']].map(([id,label])=>`<option value="${id}" ${ui.compSort===id?'selected':''}>${label}</option>`).join('')}
+   </select></label>
+   <label class="field"><span>Market</span>${marketSelect()}</label>
+   <label class="field"><span>Site</span>${siteSelect()}</label>
+   <label class="field"><span>Assessment status</span><select id="status-filter">${['All statuses','Overdue','Due soon','Completed','Scheduled','Archived'].map(st=>`<option value="${st}" ${ui.status===st?'selected':''}>${st}</option>`).join('')}</select></label>
+  </div>
+  <div class="comp-filter-footer"><span>Filters apply to assessment records within each employee group.</span><button type="button" class="button secondary small" id="comp-clear-filters">Reset filters</button></div>
+ </div>
+ <section class="panel comp-directory">
+  <div class="section-head comp-directory-header">
+   <div><h2>Employees <span class="count">${groups.length}</span></h2><p>${rows.length} assessment record${rows.length===1?'':'s'} · grouped by employee</p></div>
+   <div class="comp-directory-actions"><button type="button" id="comp-expand-all" class="comp-text-action">Expand all</button><span class="comp-separator">·</span><button type="button" id="comp-collapse-all" class="comp-text-action">Collapse all</button></div>
+  </div>
+  ${groups.length?`<div class="comp-groups">${groups.map((group,index)=>{
+    const employee=group.employee;
+    const expanded=ui.compExpanded[employee.id]===undefined?index===0:ui.compExpanded[employee.id];
+    return `<article class="comp-employee-card ${expanded?'expanded':''}">
+     <button type="button" class="comp-employee-toggle" data-comp-toggle="${attr(employee.id)}" aria-expanded="${expanded}" aria-controls="comp-content-${attr(employee.id)}">
+      <span class="initial-avatar">${initials(employee.name)}</span>
+      <span class="comp-employee-info"><strong>${esc(employee.name)}</strong><small>${esc(getMarket(employee.site)?.name||'Legacy location')} · ${esc(employee.site)}</small></span>
+      <span class="comp-employee-stats">
+        ${group.overdue?`<span class="comp-stat overdue"><b>${group.overdue}</b> overdue</span>`:''}
+        ${group.dueSoon?`<span class="comp-stat due"><b>${group.dueSoon}</b> due soon</span>`:''}
+        ${group.completed?`<span class="comp-stat complete"><b>${group.completed}</b> complete</span>`:''}
+        <span class="comp-stat total">${group.records.length} record${group.records.length===1?'':'s'}</span>
+      </span>
+      <span class="comp-employee-chevron" aria-hidden="true">⌄</span>
+     </button>
+     <div class="comp-employee-body" id="comp-content-${attr(employee.id)}" ${expanded?'':'hidden'}>
+      <div class="comp-employee-subhead"><span>${group.open?`Next pending: ${esc(dateLabel(group.earliest))}`:'No pending assessments in this view'}</span><button type="button" class="comp-profile-link" data-staff="${attr(employee.id)}">View employee profile ↗</button></div>
+      <div class="table-scroll"><table class="comp-assessment-table"><thead><tr><th>TEST SYSTEM</th><th>STAGE</th><th>DUE DATE</th><th>STATUS</th><th></th></tr></thead><tbody>${group.records.map(compactCompetencyRow).join('')}</tbody></table></div>
+     </div>
+    </article>`;
+  }).join('')}</div>`:emptyState('No competency records match','Try another search or adjust the filters.') }
+ </section>`;
+}
 function docs(){const docs=db.documents.filter(d=>!d.employee_id||visiblePeople().some(p=>p.id===d.employee_id)).filter(d=>!d.employee_id||filterSite(getEmp(d.employee_id)||{}));const catalog=PLATFORMS.filter(p=>p.source);return `${pageHead('EVIDENCE & RECORDS','Document library','Keep competency evidence linked to the correct employee and assessment.',isManager()?`<button class="button primary" data-action="upload-template">↑ Add reference template</button>`:'')}
 <div class="document-banner"><div><span class="banner-emblem">▣</span></div><div><strong>Recommended file organization</strong><p>Employee → test system → assessment year. Upload signed checklists, QC printouts, competency worksheets and remediation evidence. Shared reference checklists remain separate from employee records.</p></div></div>
 <div class="docs-layout"><section class="panel"><div class="section-head"><div><h2>Employee documents <span class="count">${docs.filter(d=>d.employee_id).length}</span></h2><p>Only assigned users should have access to sensitive files.</p></div></div>${docs.filter(d=>d.employee_id).length?`<div class="table-scroll"><table><thead><tr><th>DOCUMENT</th><th>EMPLOYEE</th><th>UPLOADED</th><th></th></tr></thead><tbody>${docs.filter(d=>d.employee_id).slice().reverse().map(d=>`<tr><td><div class="doc-name"><span class="file-icon">▤</span><div><b>${esc(d.file_name)}</b><small>${esc(d.mime_type||'Linked document')}</small></div></div></td><td>${esc(getEmp(d.employee_id)?.name||'Unknown')}</td><td>${dateLabel((d.created_at||'').slice(0,10))}</td><td><button class="icon-button" data-file="${d.id}" aria-label="Open document">↗</button></td></tr>`).join('')}</tbody></table></div>`:emptyState('No employee evidence yet','Open an assessment and upload a signed training checklist, competency record or QC documentation.')}</section><section class="panel"><div class="section-head"><div><h2>Reference templates</h2><p>${catalog.length} training checklist catalog entries · upload files to activate</p></div></div><div class="template-list">${catalog.map(p=>{const attached=docs.find(d=>d.platform_id===p.id&&!d.employee_id);return `<div class="template-row"><div class="template-file">▤</div><div><b>${esc(p.name)}</b><small>${attached?esc(attached.file_name):esc(p.source)}</small></div>${attached?`<button class="mini-button" data-file="${attached.id}">Open ↗</button>`:isManager()?`<button class="mini-button" data-template="${p.id}">Upload</button>`:''}</div>`}).join('')}${docs.filter(d=>!d.employee_id&&!catalog.some(p=>p.id===d.platform_id)).map(d=>`<div class="template-row"><div class="template-file">▤</div><div><b>${esc(d.file_name)}</b><small>Shared reference</small></div><button class="mini-button" data-file="${d.id}">Open ↗</button></div>`).join('')}</div><div class="template-tip">Template names are a reference catalog, not attached files. Upload the actual checklist to use it. Do not upload confidential files to the public demo.</div></section></div>`;}
