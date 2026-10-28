@@ -1,4 +1,12 @@
-export const SITES = ['Beverly Hills', 'Santa Monica', 'Manhattan Beach', 'San Francisco', 'San Leandro', 'Florida', 'New York', 'Short Pump'];
+export const MARKETS = [
+  {id:'SoCal',name:'Southern California',sites:['Beverly Hills Flagship','Beverly Hills Satellite','Santa Monica','Manhattan Beach']},
+  {id:'NorCal',name:'Northern California',sites:['San Francisco','Palo Alto']},
+  {id:'FL',name:'Florida',sites:['Boca Raton','Palm Beach','Coral Gables']},
+  {id:'NY',name:'New York',sites:['Upper East Side','Tribeca','Hamptons','Fifth Avenue','Gramercy','Hudson Yards']}
+];
+export const SITES = MARKETS.flatMap(market=>market.sites);
+export const getMarket = site=>MARKETS.find(market=>market.sites.includes(site))||null;
+export const getMarketSites = marketId=>MARKETS.find(market=>market.id===marketId)?.sites||[];
 export const ROLES = ['Lab Technician', 'Lab Supervisor', 'RN', 'RN Lead', 'Medical Assistant', 'Manager', 'Other'];
 export const ELEMENTS = [
   'Direct observation of routine patient testing and specimen handling',
@@ -76,14 +84,14 @@ export function createStages(enrollment, now=isoToday()){
 export function demoData(){
  const today=isoToday();
  const people=[
-  ['Jordan Lee','Lab Technician','Beverly Hills',-420],
+  ['Jordan Lee','Lab Technician','Beverly Hills Flagship',-420],
   ['Taylor Morgan','Lab Technician','Santa Monica',-190],
   ['Alex Rivera','RN','Manhattan Beach',-35],
-  ['Morgan Chen','Lab Technician','Beverly Hills',-690],
+  ['Morgan Chen','Lab Technician','Beverly Hills Satellite',-690],
   ['Casey Johnson','Lab Technician','Santa Monica',-355],
   ['Avery Patel','RN Lead','Manhattan Beach',-90],
   ['Riley Smith','Lab Technician','San Francisco',-800],
-  ['Jamie Park','Lab Technician','New York',-20]
+  ['Jamie Park','Lab Technician','Upper East Side',-20]
  ];
  const shift=(n)=>{let d=new Date(`${today}T12:00:00`);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
  const employees=people.map(([name,role,site,days],i)=>({id:uuid(),name,email:'',role,site,hire_date:shift(days),status:'active',offboard_reason:null,offboarded_at:null,created_at:new Date().toISOString()}));
