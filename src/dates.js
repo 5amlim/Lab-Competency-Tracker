@@ -1,15 +1,7 @@
 // Branded calendar popover for native date inputs. The original date input
 // keeps its name/value/required semantics for existing forms.
+import {isoFor,dateParts,moveMonth} from './date-utils.js';
 let active = null;
-const pad = n => String(n).padStart(2,'0');
-export const isoFor = (year,month,day) => `${year}-${pad(month)}-${pad(day)}`;
-const dateParts = value => {
-  const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(value||'');
-  if (!match) return null;
-  const y=Number(match[1]),m=Number(match[2]),d=Number(match[3]);
-  if(m<1||m>12||d<1||d>new Date(y,m,0).getDate())return null;
-  return {year:y,month:m,day:d};
-};
 const todayParts=()=>{const d=new Date();return {year:d.getFullYear(),month:d.getMonth()+1,day:d.getDate()};};
 const format = value => {
   const p=dateParts(value);
@@ -17,10 +9,6 @@ const format = value => {
   return new Date(p.year,p.month-1,p.day).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 };
 const monthName=(year,month)=>new Date(year,month-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
-function moveMonth(year,month,offset){
- const d=new Date(year,month-1+offset,1);
- return {year:d.getFullYear(),month:d.getMonth()+1};
-}
 function closeCalendar(focus=false){
  if(!active)return;
  const {popup,trigger}=active;
