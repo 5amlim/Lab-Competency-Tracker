@@ -73,7 +73,7 @@ function showMenu(select,trigger) {
     if(e.key==='Escape'){e.preventDefault();closeMenu(true);}
   });
   const current=menu.querySelector('.selected')||menu.querySelector('.app-select-option');
-  current?.scrollIntoView({block:'nearest'});
+  if(current)menu.scrollTop=Math.max(0,current.offsetTop-menu.offsetTop-menu.clientHeight/2);
 }
 document.addEventListener('pointerdown',e=>{
   if(opened&&!opened.menu.contains(e.target)&&!opened.trigger.contains(e.target))closeMenu();
@@ -114,7 +114,7 @@ export function enhanceSelects(root=document) {
     host.appendChild(button);
     button.addEventListener('click',()=>opened?.trigger===button?closeMenu():showMenu(select,button));
     button.addEventListener('keydown',e=>{
-      if(['ArrowDown','Enter',' '].includes(e.key)){e.preventDefault();showMenu(select,button);}
+      if(['ArrowDown','Enter',' '].includes(e.key)){e.preventDefault();showMenu(select,button);opened?.menu.querySelector('.selected, .app-select-option')?.focus();}
     });
     select.addEventListener('change',()=>refreshSelect(select));
     refreshSelect(select);
