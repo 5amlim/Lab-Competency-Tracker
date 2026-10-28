@@ -135,7 +135,7 @@
 
 /* Custom dates: website calendar, never the browser's OS date popover. */
 .app-date-host{position:relative;width:100%;min-width:0}
-.app-date-host input[type="date"][data-app-date]{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;padding:0!important;border:0!important;left:0;top:0;min-width:0;overflow:hidden}
+.app-date-host input[data-app-date]{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;padding:0!important;border:0!important;left:0;top:0;min-width:0;overflow:hidden}
 .app-date-trigger{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;padding:11px 14px;background:#fff;border:1px solid #d8e4e9;border-radius:10px;color:#2d4d60;text-align:left;font-size:12px;font-weight:700;cursor:pointer;transition:box-shadow .15s,border .15s,background .15s}
 .app-date-trigger:hover{border-color:#77c4b8;background:#fbfefd}
 .app-date-trigger:focus-visible,.app-date-trigger.is-open{outline:none;border-color:#17a699;box-shadow:0 0 0 3px #0a9b8b21}
@@ -237,3 +237,7 @@
  .comp-employee-info>small{font-size:10px}
  .comp-employee-stats{padding-left:0}
 }
+
+.app-calendar-header{gap:6px}
+.app-calendar-nav.year-jump{width:29px;min-width:29px;background:#fff;color:#6b90a0;font-size:20px}
+.app-calendar-nav.year-jump:hover{background:#ecf8f5}
