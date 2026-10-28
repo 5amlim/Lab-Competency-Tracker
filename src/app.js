@@ -78,9 +78,88 @@ async function addRecords(table,records){if(cloudEnabled){const saved=await inse
 async function patch(table,id,obj){if(cloudEnabled){await updateCloud(table,id,obj);}const target=db[table].find(x=>x.id===id);if(target)Object.assign(target,obj);if(!cloudEnabled)saveLocal(db);}
 async function removeRecord(table,id){if(cloudEnabled)await removeCloud(table,id);db[table]=db[table].filter(r=>r.id!==id);if(!cloudEnabled)saveLocal(db);}
 function showDialog(kind){if(kind==='add-employee')return addEmployeeDialog();if(kind==='assign-platform')return assignPlatformDialog();if(kind==='offboard')return offboardDialog();if(kind==='upload-template')return templateDialog();}
-function addEmployeeDialog(){modal(`${modalHead('ONBOARDING','Add new employee','Add the employee first, then assign test systems and assessment start dates.')}
-<form id="employee-form" class="form-body"><div class="form-grid"><label class="field"><span>Full name *</span><input name="name" required placeholder="Employee full name"/></label><label class="field"><span>Role *</span><select name="role" required>${ROLES.map(x=>`<option>${esc(x)}</option>`).join('')}</select></label><label class="field"><span>Market *</span><select name="market" id="employee-market" required>${allowedMarkets().map(m=>`<option value="${attr(m.id)}">${esc(m.name)}</option>`).join('')}</select></label><label class="field"><span>Site *</span><select name="site" id="employee-site" required>${siteOptions(scopedSites().filter(site=>getMarket(site)?.id===allowedMarkets()[0]?.id))}</select></label><label class="field"><span>Hire date *</span><input type="date" name="hire_date" required value="${isoToday()}"/></label></div><label class="field"><span>Work email (optional)</span><input name="email" type="email" placeholder="staff@company.com"/></label><div class="notice-box">Instrument-specific first-testing dates are set when you assign a platform. The hire date does not automatically start every competency clock.</div><div class="form-actions"><button type="button" class="button secondary modal-close">Cancel</button><button type="submit" class="button primary">Add employee →</button></div></form>`);
- const form=document.getElementById('employee-form');const employeeMarket=document.getElementById('employee-market');const employeeSite=document.getElementById('employee-site');employeeMarket?.addEventListener('change',()=>{employeeSite.innerHTML=siteOptions(scopedSites().filter(site=>getMarket(site)?.id===employeeMarket.value));});form.addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(form);const record={id:uuid(),name:String(f.get('name')).trim(),role:f.get('role'),site:f.get('site'),hire_date:f.get('hire_date'),email:f.get('email'),status:'active',offboard_reason:null,offboarded_at:null,created_at:new Date().toISOString()};if(!record.name)return;if(!scopedSites().includes(record.site)||getMarket(record.site)?.id!==f.get('market')){notice('Select a valid site within the selected market.');return;}try{await addRecords('employees',[record]);closeOverlays();ui.staff=record.id;render();notice('Employee added. Assign their first test system.')}catch(err){notice(err.message)}});}
+function addEmployeeDialog(){
+ const markets=allowedMarkets();
+ if(!markets.length){notice('No sites are available for your account.');return;}
+ modal(`${modalHead('TEAM ONBOARDING','Add an employee','Choose their home site and the instruments they need competency tracking for.')}
+ <form id="employee-form" class="form-body onboarding-form">
+ <div class="onboard-heading"><span class="step-number">01</span><div><h3>Employee details</h3><p>Location determines the site's available instrument menu.</p></div></div>
+ <div class="form-grid">
+  <label class="field"><span>Full name *</span><input name="name" required placeholder="Employee full name" autocomplete="off"/></label>
+  <label class="field"><span>Role *</span><select name="role" required>${ROLES.map(x=>`<option>${esc(x)}</option>`).join('')}</select></label>
+  <label class="field"><span>Market *</span><select name="market" id="employee-market" required>${markets.map(m=>`<option value="${attr(m.id)}">${esc(m.name)}</option>`).join('')}</select></label>
+  <label class="field"><span>Site *</span><select name="site" id="employee-site" required>${siteOptions(scopedSites().filter(site=>getMarket(site)?.id===markets[0]?.id))}</select></label>
+  <label class="field"><span>Hire date *</span><input type="date" name="hire_date" value="${isoToday()}" required/></label>
+  <label class="field"><span>Work email <small>(optional)</small></span><input name="email" type="email" placeholder="employee@company.com"/></label>
+ </div>
+ <div class="onboard-heading spaced"><span class="step-number">02</span><div><h3>Instrument assignments</h3><p>Site equipment is preloaded. Select the systems this employee will train or be assessed on.</p></div></div>
+ <div class="equipment-panel">
+  <div class="equipment-top"><div><strong id="equipment-site"></strong><small id="equipment-availability"></small></div><div class="equipment-actions"><button type="button" class="button secondary small" id="equip-all">Select all</button><button type="button" class="button secondary small" id="equip-none">Clear</button></div></div>
+  <div class="equipment-list" id="equipment-list"></div>
+  <div class="equipment-bottom"><span class="selection-count" id="equipment-count">0 selected</span><span>Assignments start as pending, not completed competencies.</span></div>
+ </div>
+ <label class="field enrollment-baseline"><span>First-testing / competency baseline date *</span><input type="date" name="first_testing_date" required value="${isoToday()}"/><small>Used to schedule initial, 6-month and annual assessments for selected instruments. Adjust if training begins on a different date.</small></label>
+ <div class="onboarding-note"><span>ⓘ</span><p>Only checked instruments will be assigned. You can assign others later from the employee profile. Selecting a system does not certify the employee.</p></div>
+ <div class="form-actions"><button type="button" class="button secondary modal-close">Cancel</button><button type="submit" class="button primary" id="employee-submit">Create employee &amp; assignments</button></div>
+ </form>`,'wide-modal');
+ const form=document.getElementById('employee-form');
+ const market=document.getElementById('employee-market');
+ const site=document.getElementById('employee-site');
+ const equipment=document.getElementById('equipment-list');
+ function updateCount(){
+  const n=equipment.querySelectorAll('input[name="platform"]:checked').length;
+  document.getElementById('equipment-count').textContent=`${n} selected`;
+ }
+ function renderEquipment(){
+  const platforms=sitePlatforms(site.value);
+  const selected=new Set([...equipment.querySelectorAll('input[name="platform"]:checked')].map(x=>x.value));
+  document.getElementById('equipment-site').textContent=site.value;
+  document.getElementById('equipment-availability').textContent=`${platforms.length} available systems${site.value.startsWith('Beverly Hills ')?' · Includes BioFire TORCH':''}`;
+  const groups=[...new Set(platforms.map(p=>p.group))];
+  equipment.innerHTML=groups.map(group=>`<div class="equipment-group"><div class="equipment-group-name">${esc(group)}</div><div class="equipment-group-items">${platforms.filter(p=>p.group===group).map(p=>`<label class="equipment-choice"><input type="checkbox" name="platform" value="${attr(p.id)}" ${selected.has(p.id)?'checked':''}/><span class="equipment-check">✓</span><span>${esc(p.name)}</span>${p.id==='torch'?'<span class="equipment-special">BH only</span>':''}</label>`).join('')}</div></div>`).join('');
+  updateCount();
+ }
+ market.addEventListener('change',()=>{
+  site.innerHTML=siteOptions(scopedSites().filter(loc=>getMarket(loc)?.id===market.value));
+  refreshSelect(site);
+  renderEquipment();
+ });
+ site.addEventListener('change',renderEquipment);
+ equipment.addEventListener('change',updateCount);
+ document.getElementById('equip-all').addEventListener('click',()=>{
+  equipment.querySelectorAll('input[name="platform"]').forEach(input=>{input.checked=true;});
+  updateCount();
+ });
+ document.getElementById('equip-none').addEventListener('click',()=>{
+  equipment.querySelectorAll('input[name="platform"]').forEach(input=>{input.checked=false;});
+  updateCount();
+ });
+ renderEquipment();
+ form.addEventListener('submit',async event=>{
+  event.preventDefault();
+  const fd=new FormData(form);
+  const record={id:uuid(),name:String(fd.get('name')||'').trim(),role:fd.get('role'),site:fd.get('site'),hire_date:fd.get('hire_date'),email:fd.get('email'),status:'active',offboard_reason:null,offboarded_at:null,created_at:new Date().toISOString()};
+  if(!record.name||!scopedSites().includes(record.site)||getMarket(record.site)?.id!==fd.get('market'))return notice('Choose a valid employee name, market and site.');
+  const selected=fd.getAll('platform').map(String);
+  if(selected.some(id=>!sitePlatforms(record.site).some(platform=>platform.id===id)))return notice('One or more instruments are not available at this site.');
+  const baseline=String(fd.get('first_testing_date')||'');
+  if(selected.length&&!baseline)return notice('Enter the first-testing / competency baseline date.');
+  const submit=document.getElementById('employee-submit');submit.disabled=true;submit.textContent='Saving employee…';
+  try {
+   await addRecords('employees',[record]);
+   if(selected.length){
+    const enrollments=selected.map(id=>({id:uuid(),employee_id:record.id,platform_id:id,first_testing_date:baseline,complexity:getPlatform(id).mode,created_at:new Date().toISOString()}));
+    await addRecords('enrollments',enrollments);
+    await addRecords('assessments',enrollments.flatMap(enrollment=>createStages(enrollment)));
+   }
+   closeOverlays();ui.staff=record.id;render();notice(`Employee added with ${selected.length} instrument assignments.`);
+  }catch(err){
+   submit.disabled=false;submit.textContent='Create employee & assignments';
+   notice(`Save failed: ${err.message}. Check the team directory before retrying.`);
+   await refreshCloud();
+  }
+ });
+}
 function showEmployee(id){const p=getEmp(id);if(!p){closeOverlays();return;}const ens=db.enrollments.filter(e=>e.employee_id===id);const archived=p.status==='offboarded';modal(`${modalHead('EMPLOYEE PROFILE',p.name,`${p.role} · ${getMarket(p.site)?.name||'Legacy location'} · ${p.site}`)}<div class="employee-header"><span class="profile-avatar">${initials(p.name)}</span><div><div>${archived?badge(p.offboard_reason==='terminated'?'Terminated':'Resigned','archived'):badge('Active employee','connected')}</div><small>Hired ${dateLabel(p.hire_date)}${p.email?' · '+esc(p.email):''}</small></div></div><div class="profile-tools">${isManager()&&!archived?`<button class="button primary small" id="assign">+ Assign test system</button>`:''}${isAdmin()&&!archived?`<button class="button light-danger small" id="offboard">Offboard employee</button>`:''}${archived?`<span class="archived-note">Offboarded ${dateLabel(p.offboarded_at?.slice(0,10))}. Historical records retained.</span>`:''}</div><div class="subheading">Test system assignments <span class="count">${ens.length}</span></div>${ens.length?`<div class="enrollment-list">${ens.map(en=>{const entries=linked(en);const done=entries.filter(a=>a.completed_at).length,late=entries.filter(a=>!a.completed_at&&daysUntil(a.due_date)<0).length;return `<div class="en-card"><div class="en-title"><div><strong>${esc(getPlatform(en.platform_id).name)}</strong><small>First testing ${dateLabel(en.first_testing_date)} · ${getPlatform(en.platform_id).group}</small></div>${badge(`${done}/${entries.length} complete`,'neutral')}</div><div class="en-stages">${entries.filter(a=>a.phase!=='annual'||daysUntil(a.due_date)<370).sort((a,b)=>a.due_date.localeCompare(b.due_date)).map(a=>`<button class="stage-chip" data-ass="${a.id}"><span>${esc(getPhase(a.phase).short)}${a.phase==='annual'?` ${a.cycle}`:''}</span>${statusBadge(a,p)}</button>`).join('')}</div>${late?`<small class="danger-text">${late} overdue assessment${late!==1?'s':''}</small>`:''}</div>`}).join('')}</div>`:emptyState('No assigned systems','Assign an instrument to start tracking training and competency.')}`, 'wide-modal');on('#assign','click',()=>{ui.dialog='assign-platform';ui.assessment=null;render()});on('#offboard','click',()=>{ui.dialog='offboard';render()});on('.stage-chip','click',e=>{ui.staff=null;ui.dialog=null;ui.assessment=e.currentTarget.dataset.ass;render()});}
 function assignPlatformDialog(){const staff=ui.staff;const p=getEmp(staff);if(!p)return;const assigned=db.enrollments.filter(e=>e.employee_id===staff).map(e=>e.platform_id);const available=sitePlatforms(p.site).filter(t=>!assigned.includes(t.id));modal(`${modalHead('TEST SYSTEM ENROLLMENT','Assign a test system',`Employee: ${p.name}`)}${available.length?`<form class="form-body" id="assign-form"><label class="field"><span>Test system *</span><select name="platform" id="platform-select" required>${available.map(t=>`<option value="${t.id}">${esc(t.name)} · ${esc(t.group)}</option>`).join('')}</select></label><div class="form-grid"><label class="field"><span>First-testing / assessment start date *</span><input type="date" required name="first_testing_date" value="${isoToday()}"/></label><label class="field"><span>Applicable policy *</span><select name="complexity" id="policy-select"><option value="nonwaived">Nonwaived: six elements</option><option value="waived">Waived: site-specific</option><option value="site-policy">Other: site policy</option></select></label></div><div class="notice-box">This creates four milestones: initial training, initial competency, six-month competency and annual assessments. Choose the actual first-testing date for this platform, not automatically the date of hire. Confirm test complexity with your laboratory director.</div><div class="form-actions"><button type="button" class="button secondary modal-close">Cancel</button><button type="submit" class="button primary">Assign & schedule</button></div></form>`:emptyState('All systems assigned','All systems available at this site are already assigned.')}`,'wide-modal');const select=document.getElementById('platform-select'),policy=document.getElementById('policy-select');if(select){const sync=()=>policy.value=getPlatform(select.value).mode;sync();select.addEventListener('change',sync);}const form=document.getElementById('assign-form');if(form)form.addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(form),en={id:uuid(),employee_id:staff,platform_id:f.get('platform'),first_testing_date:f.get('first_testing_date'),complexity:f.get('complexity'),created_at:new Date().toISOString()};if(!en.first_testing_date)return;try{await addRecords('enrollments',[en]);await addRecords('assessments',createStages(en));ui.dialog=null;ui.staff=staff;render();notice('Test system assigned and milestones scheduled.')}catch(err){notice(err.message);await refreshCloud()}});}
 function offboardDialog(){const p=getEmp(ui.staff);if(!p)return;modal(`${modalHead('STAFF OFFBOARDING','Offboard employee',`Employee: ${p.name}`)}<form id="offboard-form" class="form-body"><div class="notice-box caution"><strong>Historical records will be preserved.</strong><p>New reminders stop. Completed assessments, documents and sign-offs remain accessible to authorized administrators. This does not deactivate the employee's login or revoke external SharePoint access.</p></div><label class="field"><span>Reason *</span><select name="reason"><option value="resigned">Resigned / departed voluntarily</option><option value="terminated">Terminated / involuntary separation</option></select></label><label class="field"><span>Offboarding date *</span><input type="date" name="date" value="${isoToday()}" required/></label><label class="field"><span>Type employee name to confirm *</span><input name="confirm" required placeholder="${attr(p.name)}"/></label><div class="form-actions"><button type="button" class="button secondary modal-close">Cancel</button><button type="submit" class="button light-danger">Confirm offboarding</button></div></form>`);document.getElementById('offboard-form').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target);if(f.get('confirm')!==p.name)return notice('Name does not match. Offboarding cancelled.');try{await patch('employees',p.id,{status:'offboarded',offboard_reason:f.get('reason'),offboarded_at:`${f.get('date')}T12:00:00Z`});ui.dialog=null;render();notice('Employee offboarded. Competency records preserved; reminders stopped.')}catch(err){notice(err.message)}});}
