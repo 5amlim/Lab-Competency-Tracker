@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {datePlus,createStages,demoData,getPlatform,statusOf,isoToday} from '../src/data.js';
+import {datePlus,createStages,demoData,getPlatform,statusOf,isoToday,MARKETS,SITES,getMarket,getMarketSites} from '../src/data.js';
 test('month schedule clamps leap-year dates',()=>{
  assert.equal(datePlus('2024-08-31',6),'2025-02-28');
  assert.equal(datePlus('2024-02-29',12),'2025-02-28');
@@ -25,4 +25,18 @@ test('demo uses fictional records and has no evidence by default',()=>{
  assert.equal(d.documents.length,0);
  assert(d.assessments.length>d.enrollments.length*4);
  assert(getPlatform('pathfast').source===null);
+});
+test('markets contain exactly the 15 requested full-name sites',()=>{
+ assert.deepEqual(MARKETS.map(m=>[m.id,m.sites.length]),[['SoCal',4],['NorCal',2],['FL',3],['NY',6]]);
+ assert.equal(SITES.length,15);
+ assert.equal(new Set(SITES).size,15);
+ assert.deepEqual(getMarketSites('SoCal'),['Beverly Hills Flagship','Beverly Hills Satellite','Santa Monica','Manhattan Beach']);
+ assert.deepEqual(getMarketSites('NorCal'),['San Francisco','Palo Alto']);
+ assert.deepEqual(getMarketSites('FL'),['Boca Raton','Palm Beach','Coral Gables']);
+ assert.deepEqual(getMarketSites('NY'),['Upper East Side','Tribeca','Hamptons','Fifth Avenue','Gramercy','Hudson Yards']);
+ assert.equal(getMarket('Beverly Hills Satellite').name,'Southern California');
+ assert.equal(getMarket('Palo Alto').id,'NorCal');
+ assert.equal(getMarket('Random legacy site'),null);
+ const demo=demoData();
+ assert(demo.employees.every(e=>SITES.includes(e.site)),'All fictional employees must have a valid site');
 });
