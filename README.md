@@ -99,6 +99,14 @@ All 15 sites share the same instrument catalog except **Beverly Hills Flagship**
 
 The interface uses custom site/market/test-system selectors that appear inside the website, not browser-native dropdowns. The original `select` elements remain in the DOM for validated form submission, and the menus support keyboard focus and Escape. The assessment form includes a progress indicator and a fixed action footer, while reference uploads use a styled file-picker button.
 
+## In-app calendar and employee-grouped assessments
+
+All calendar fields, including hire date, first-testing date, sign-off date and offboarding date, use a website-rendered date picker. Choose a day using the month/year navigation and Today shortcut. The form still stores an ISO-formatted date for consistent scheduling and exports; the browser's native date picker is not used.
+
+The **Competencies** screen now groups assessment records under their employee rather than repeating the same employee in every table row. Expand any employee to review all matching stages. The **Sort & filter** control includes market, site, assessment status, and ordering by earliest deadline, most overdue, employee name or site. Reset Filters restores the original view.
+
+The employee onboarding role choices are Lab Technician, RN, RN Lead, Medical Assistant, and Other. The Manager and Lab Supervisor options were removed from the onboarding selector; this does **not** change administrative login access or modify existing employee records.
+
 ## Competency design
 
 Each *employee + test system* has its own first-testing date, selected test complexity/policy and schedule:
