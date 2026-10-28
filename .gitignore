@@ -1,0 +1,7 @@
+private_templates/
+.qa/
+*.log
+.env
+.env.*
+preview.png
+.DS_Store

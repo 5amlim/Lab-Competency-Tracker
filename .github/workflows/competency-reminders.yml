@@ -1,0 +1,18 @@
+name: Lab competency reminders
+on:
+  schedule:
+    - cron: '30 15 * * *' # 15:30 UTC, morning LA (varies with DST)
+  workflow_dispatch:
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger private reminder function
+        env:
+          ENDPOINT: ${{ secrets.APP_REMINDER_ENDPOINT }}
+          CRON_SECRET: ${{ secrets.APP_CRON_SECRET }}
+        run: |
+          test -n "$ENDPOINT" && test -n "$CRON_SECRET"
+          curl --fail-with-body --retry 2 --request POST \
+            --header "x-cron-secret: $CRON_SECRET" \
+            "$ENDPOINT"
