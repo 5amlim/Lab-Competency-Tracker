@@ -50,7 +50,7 @@ Supabase (PostgreSQL/Auth/private Storage) is included as a ready-to-configure c
 2. Run `supabase/schema.sql` in Supabase SQL Editor. The schema enables RLS, access policies, a private 25 MB document bucket, audit events and immutable completed assessment records.
 3. In Supabase > Authentication > Users, create/invite the first administrator. Copy their Auth user UUID.
 4. SQL Editor: `insert into public.app_users(user_id,role,allowed_sites) values ('UUID-FROM-AUTH','admin','{}');`
-5. For staff with restricted access: `insert into public.app_users(user_id,role,allowed_sites) values ('UUID-FROM-AUTH','manager',ARRAY['Beverly Hills','Santa Monica']);` or use `viewer` (read only). **Use least-privilege roles.** Employee records in this tracker do not automatically create Auth accounts.
+5. For staff with restricted access: `insert into public.app_users(user_id,role,allowed_sites) values ('UUID-FROM-AUTH','manager',ARRAY['Beverly Hills Flagship','Santa Monica']);` or use `viewer` (read only). **Use least-privilege roles.** Employee records in this tracker do not automatically create Auth accounts.
 6. Change `config.js`:
    ```js
    window.COMPETENCY_CONFIG = {
@@ -77,6 +77,19 @@ The site always shows due/overdue items. To send emails automatically:
 6. Check the automation run log, sender domain, local timezone, delivery and failure alerts. Scheduling is not operational just because the project ZIP includes a workflow.
 
 **If using SharePoint instead:** use a SharePoint List with a Due Date column and Power Automate **Set a reminder** / a scheduled flow. This is the simplest no-code email reminder. The app's in-app reminders do not automatically sync with SharePoint List due dates.
+
+## Markets and site directory
+
+The site list is grouped into four markets. Each location is saved by its full site name, while the market is derived from that site.
+
+| Market | Sites |
+|---|---|
+| Southern California (SoCal) | Beverly Hills Flagship, Beverly Hills Satellite, Santa Monica, Manhattan Beach |
+| Northern California (NorCal) | San Francisco, Palo Alto |
+| Florida (FL) | Boca Raton, Palm Beach, Coral Gables |
+| New York (NY) | Upper East Side, Tribeca, Hamptons, Fifth Avenue, Gramercy, Hudson Yards |
+
+Use the market filter to narrow the site dropdown. When adding an employee, choose a market first and then a site. Pre-existing generic locations such as `Florida`, `New York`, `San Leandro`, or `Short Pump` are preserved as legacy assignments for review rather than automatically mapped to a different clinic. The original fictional demo employees are migrated to their intended named locations in local browser storage. Before connecting a real Supabase workspace, update `app_users.allowed_sites` to these exact full-site values.
 
 ## Competency design
 
