@@ -2,3 +2,127 @@
 @media (max-width:1200px){.sidebar{width:205px;flex-basis:205px}.topbar{padding:0 25px}.content{padding:29px 25px 50px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.overview-grid{grid-template-columns:1fr}.site-panel{display:grid;grid-template-columns:repeat(2,1fr)}.site-panel>.section-head,.site-panel>.helper-note{grid-column:1/-1}.workflow{flex-wrap:wrap}}
 @media (max-width:780px){.sidebar{position:fixed;left:-260px;z-index:80;width:240px;transition:left .2s}.sidebar.mobile-open{left:0;box-shadow:15px 0 40px #0004}.mobile-menu{display:block;background:none;border:none;font-size:20px;margin-right:12px;color:#4a6676}.topbar{height:60px;padding:0 17px;justify-content:flex-start}.top-right{margin-left:auto}.date-chip{display:none}.content{padding:22px 15px 38px}.page-head{align-items:flex-start}.page-head h1{font-size:25px}.page-head p{line-height:1.5}.metrics{gap:10px}.metric{padding:15px}.metric strong{font-size:30px}.metric-top{font-size:11px}.metric-foot{font-size:10px}.docs-layout,.reminder-columns,.settings-grid{grid-template-columns:1fr}.filter-bar{flex-wrap:wrap}.search-box{flex-basis:100%}.filter-bar .select{flex:1}.workflow{display:grid;grid-template-columns:1fr 1fr}.workflow-arrow{display:none}.site-panel{display:block}.top-right .badge{display:none}.modal-overlay{padding:9px}.modal{max-height:95vh}.form-grid{grid-template-columns:1fr;gap:0}.form-body,.modal-head{padding-left:18px;padding-right:18px}.assessment-strip{padding:15px 18px}.reminder-mode{display:none}}
 @media (max-width:480px){.page-head{flex-wrap:wrap}.page-head>.button{width:100%}.metric-top{display:block}.metric-icon{margin:6px 0}.workflow{grid-template-columns:1fr 1fr}.workflow>div{padding:10px;min-height:95px}.form-actions{flex-wrap:wrap}.form-actions>.button{flex:1}.stage-chip{flex:1;justify-content:space-between}.assessment-strip>div{flex:1 0 130px}}
+
+/* Refined in-app selects. Hidden native selects remain attached for form submission. */
+.app-select-host{position:relative;min-width:0;width:100%;flex-shrink:0}
+.app-select-host select[data-app-select]{position:absolute!important;opacity:0!important;width:1px!important;height:1px!important;pointer-events:none!important;left:0;top:0;overflow:hidden;padding:0!important;border:0!important}
+.app-select-trigger{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-width:0;min-height:43px;padding:10px 17px 10px 13px;background:#fff;border:1px solid #d8e5e9;border-radius:10px;color:#2b495a;font-family:inherit;font-size:12px;font-weight:700;text-align:left;cursor:pointer;transition:border .15s,box-shadow .15s,background .15s}
+.app-select-trigger:hover{border-color:#68b7ad;background:#fbfefd}
+.app-select-trigger:focus-visible,.app-select-trigger.is-open{outline:none;border-color:#0f9b91;box-shadow:0 0 0 3px #0a9a8b19}
+.app-select-trigger:disabled{opacity:.5;cursor:not-allowed;background:#f3f6f7}
+.app-select-text{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-select-chevron{display:block!important;width:9px;height:9px;min-width:9px;transform:rotate(45deg) translateY(-2px);border-right:2px solid #678497;border-bottom:2px solid #678497;margin:0 5px 3px 9px!important;transition:transform .2s}
+.app-select-trigger.is-open .app-select-chevron{transform:rotate(225deg) translate(-2px,-1px)}
+.app-select-menu{z-index:1500;background:#fff;border:1px solid #cfdee1;border-radius:12px;box-shadow:0 15px 40px #0e2e3b28;padding:6px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.app-select-group{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#80929e;font-weight:800;padding:12px 11px 6px;border-top:1px solid #edf2f4;margin-top:4px}
+.app-select-group:first-child{border:0;margin-top:0;padding-top:7px}
+.app-select-option{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;border:0;border-radius:8px;padding:11px 12px;text-align:left;background:transparent;color:#3b596a;font-size:12px;cursor:pointer;min-height:38px}
+.app-select-option:hover,.app-select-option:focus-visible{outline:none;background:#edf8f6;color:#087e76}
+.app-select-option.selected{background:#edf7f5;color:#077f75;font-weight:800}
+.app-select-check{opacity:0;color:#008d7e;font-size:14px}
+.app-select-option.selected .app-select-check{opacity:1}
+.filter-bar>.app-select-host{width:auto;flex:0 1 180px}
+.field>.app-select-host{display:block;width:100%}
+
+/* Clearer modal hierarchy and anchored action buttons. */
+.modal{border:1px solid #e6eeef;scrollbar-width:thin}
+.modal-head{position:sticky;top:0;background:#fff;z-index:15;border-bottom:1px solid #e4edee;padding:22px 27px}
+.modal-head .eyebrow{color:#008b82;letter-spacing:.15em}
+.modal-close{flex:0 0 35px;width:35px;height:35px;border-radius:10px}
+.form-body{padding:24px 27px 27px}
+.form-body>.field{margin-bottom:19px}
+.form-actions{position:sticky;bottom:-27px;z-index:12;background:#fff;margin:24px -27px -27px;padding:16px 27px 20px;border-top:1px solid #e0e9eb;box-shadow:0 -8px 16px #132f3b08;gap:10px;align-items:center;flex-wrap:wrap}
+.form-actions>.button{min-height:42px;padding:11px 17px;letter-spacing:.01em}
+.form-actions>.button.primary{margin-left:auto}
+.field span{letter-spacing:.01em}
+.field input:focus-visible,.field textarea:focus-visible{outline:none;border-color:#2ba99d;box-shadow:0 0 0 3px #2aafa01b}
+.notice-box{border-radius:10px}
+.onboard-heading{display:flex;align-items:center;gap:12px;margin:0 0 20px}
+.onboard-heading.spaced{margin-top:14px;padding-top:24px;border-top:1px solid #e9eff1}
+.onboard-heading h3{margin:0;font-family:Manrope,sans-serif;font-size:14px;color:#153b4b}
+.onboard-heading p{margin:4px 0 0;font-size:11px;color:#7b909e;line-height:1.55}
+.step-number{width:35px;height:35px;flex:0 0 35px;display:grid;place-items:center;border-radius:11px;background:#e1f3ef;color:#087e77;font-size:12px;font-weight:900}
+.onboarding-form .form-grid{margin-bottom:10px}
+.onboarding-form .field small{font-size:10px;color:#8ba0aa;font-weight:500}
+
+/* Instrument availability is a site preset, not a training attestation. */
+.equipment-panel{border:1px solid #dbece7;border-radius:12px;background:#fbfefd;overflow:hidden;margin-bottom:19px}
+.equipment-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 17px;border-bottom:1px solid #e1efeb;background:#eff9f6}
+.equipment-top strong{display:block;color:#1d5b59;font-size:12px}
+.equipment-top small{display:block;color:#628b85;margin-top:4px;font-size:10px}
+.equipment-actions{display:flex;gap:7px;flex-wrap:wrap}
+.equipment-actions .button{padding:8px 10px}
+.equipment-list{max-height:272px;overflow-y:auto;scrollbar-width:thin;padding:9px 15px 13px}
+.equipment-group{padding:8px 0}
+.equipment-group+.equipment-group{border-top:1px solid #edf2f3}
+.equipment-group-name{font-size:10px;text-transform:uppercase;letter-spacing:.09em;font-weight:900;color:#8796a2;margin:4px 0 8px}
+.equipment-group-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.equipment-choice{display:flex;align-items:center;gap:9px;border:1px solid #e1e9eb;background:#fff;border-radius:9px;padding:10px 12px;min-height:39px;cursor:pointer;color:#4a6574;font-size:11px;font-weight:700;transition:background .15s,border .15s}
+.equipment-choice:hover{border-color:#78c5b9;background:#f4fbf9}
+.equipment-choice:has(input:checked){border-color:#7bc9b9;background:#eaf7f2;color:#0a7067}
+.equipment-choice:focus-within{outline:2px solid #51b4a8;outline-offset:2px}
+.equipment-choice input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.equipment-check{display:grid;place-items:center;flex:0 0 17px;width:17px;height:17px;border:1px solid #cadbdf;border-radius:5px;color:transparent;font-size:11px;background:#fff}
+.equipment-choice:has(input:checked) .equipment-check{border-color:#189d89;background:#189d89;color:#fff}
+.equipment-special{background:#0f847e;color:#fff;font-weight:800;font-size:9px;padding:3px 5px;border-radius:5px;white-space:nowrap;margin-left:auto}
+.equipment-bottom{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:11px 17px;background:#f6faf9;border-top:1px solid #e0efec;color:#7a919b;font-size:10px}
+.selection-count{font-size:11px;font-weight:900;color:#0f8d82;white-space:nowrap}
+.enrollment-baseline{background:#f6f9fb;border-radius:10px;padding:14px 15px;border:1px solid #e1e9ee}
+.enrollment-baseline input{max-width:230px}
+.enrollment-baseline>small{display:block;color:#7f909c;line-height:1.5;font-size:11px;font-weight:400}
+.onboarding-note{display:flex;gap:11px;align-items:flex-start;border:1px solid #d9e9e7;background:#f3faf8;padding:12px 14px;border-radius:10px;margin:13px 0 16px}
+.onboarding-note>span{color:#0d998b;font-size:16px;font-weight:900}
+.onboarding-note p{margin:0;line-height:1.6;color:#47736f;font-size:11px}
+
+/* Assessment task hierarchy, checklist progress and document picker. */
+.assessment-strip{padding:16px 27px;gap:10px;background:#f6fafb}
+.assessment-strip>div{background:#fff;border:1px solid #e4ecee;padding:11px 12px;border-radius:9px;min-width:130px}
+.assessment-strip .badge{margin:0 0 0 5px}
+.assessment-strip strong{color:#224c5c}
+.assessment-progress{padding:12px 14px;border-radius:10px;border:1px solid #dcece8;background:#f1faf7;margin-bottom:16px}
+.assessment-progress>div:first-child{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:9px}
+.assessment-progress strong{font-size:11px;color:#1e7770}
+.assessment-progress span{font-size:11px;color:#237f76;font-weight:800}
+.assessment-progress-track{height:6px;background:#daebe5;border-radius:10px;overflow:hidden}
+.assessment-progress-track>span{display:block;height:100%;background:#139b88;transition:width .2s}
+.assessment-review-heading{margin:6px 0 20px;padding-top:20px;border-top:1px solid #e9eff1}
+.element-list{gap:8px}
+.element-row{min-height:64px;padding:12px 14px;border-color:#e0e9ed}
+.element-row:hover{border-color:#82c3b9;background:#fbfefd}
+.element-row:focus-within{outline:2px solid #59b9aa;outline-offset:1px}
+.element-row small{color:#0e9385;font-weight:900;letter-spacing:.08em}
+.element-row b{font-size:12px;line-height:1.5}
+.attachment-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.assessment-actions .button.primary{box-shadow:0 4px 14px #0d95852b}
+
+/* Clear in-page upload control instead of the browser's default file button. */
+.file-upload-card{text-align:center;background:#f7fbfa;border:1px dashed #9dcfc5;border-radius:12px;padding:25px 18px;margin:15px 0 17px}
+.file-upload-icon{display:grid;place-items:center;width:42px;height:42px;background:#e0f5ef;color:#078b7e;border-radius:12px;margin:0 auto 12px;font-size:22px;font-weight:900}
+.file-upload-card strong{display:block;font-size:13px;color:#244d5b}
+.file-upload-card p{font-size:11px;color:#8ca0a8;margin:7px 0 17px}
+.file-choose-button{margin:0 auto}
+.file-selected-name{display:block;color:#67808b;font-size:11px;overflow-wrap:anywhere;margin-top:12px}
+.visually-hidden-file{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important}
+.template-upload-form .field{margin-bottom:20px}
+
+@media(max-width:800px){
+ .filter-bar{flex-wrap:wrap}
+ .filter-bar>.search-box{flex-basis:100%}
+ .filter-bar>.app-select-host{flex:1 1 145px;min-width:135px}
+ .equipment-group-items{grid-template-columns:1fr}
+ .equipment-top{flex-direction:column;align-items:stretch}
+ .equipment-bottom{align-items:flex-start;flex-direction:column;gap:5px}
+}
+@media(max-width:520px){
+ .modal-overlay{padding:8px}
+ .modal{max-height:calc(100dvh - 16px);border-radius:13px}
+ .modal-head{padding:18px}
+ .form-body{padding:18px}
+ .form-actions{margin:18px -18px -18px;padding:14px 18px}
+ .form-actions>.button{flex:1 1 100%;white-space:normal}
+ .form-actions>.button.primary{margin-left:0}
+ .assessment-strip{padding:13px 17px;gap:7px}
+ .assessment-strip>div{min-width:115px;flex:1 1 40%}
+ .equipment-top{padding:12px}
+ .equipment-list{padding:10px}
+}
