@@ -225,4 +225,4 @@ grant select on public.audit_events to authenticated;
 -- insert into public.app_users(user_id,role,allowed_sites) values
 -- ('YOUR_AUTH_USER_UUID','admin','{}');
 -- Manager example: insert into public.app_users(user_id,role,allowed_sites) values
--- ('MANAGER_AUTH_UUID','manager',ARRAY['Beverly Hills','Santa Monica']);
+-- ('MANAGER_AUTH_UUID','manager',ARRAY['Beverly Hills Flagship','Santa Monica']);
