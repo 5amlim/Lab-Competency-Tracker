@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {datePlus,createStages,demoData,getPlatform,statusOf,isoToday,MARKETS,SITES,getMarket,getMarketSites} from '../src/data.js';
+import {datePlus,createStages,demoData,getPlatform,statusOf,isoToday,MARKETS,SITES,getMarket,getMarketSites,ROLES} from '../src/data.js';
 import {sitePlatforms,isBeverlyHills,availablePlatformIds} from '../src/site-presets.js';
+import {isoFor,dateParts,moveMonth} from '../src/date-utils.js';
+import {groupAssessmentRecords} from '../src/competency-groups.js';
 test('month schedule clamps leap-year dates',()=>{
  assert.equal(datePlus('2024-08-31',6),'2025-02-28');
  assert.equal(datePlus('2024-02-29',12),'2025-02-28');
@@ -65,4 +67,49 @@ test('each chosen site instrument generates independent competency milestones',(
  assert.equal(stages.filter(s=>s.phase==='initial_training').length,2);
  assert.equal(stages.filter(s=>s.phase==='six_month').length,2);
  assert.equal(stages.filter(s=>s.phase==='annual'&&s.due_date==='2027-10-27').length,2);
+});
+
+test('employee role picker excludes management-only entries',()=>{
+ assert(!ROLES.includes('Manager'));
+ assert(!ROLES.includes('Lab Supervisor'));
+ assert(ROLES.includes('Lab Technician'));
+ assert(ROLES.includes('RN'));
+});
+test('calendar handles leap years and month/year boundaries',()=>{
+ assert.deepEqual(dateParts('2024-02-29'),{year:2024,month:2,day:29});
+ assert.equal(dateParts('2025-02-29'),null);
+ assert.equal(dateParts('2026-13-01'),null);
+ assert.equal(dateParts('2026-10-00'),null);
+ assert.equal(isoFor(2026,1,9),'2026-01-09');
+ assert.deepEqual(moveMonth(2026,1,-1),{year:2025,month:12});
+ assert.deepEqual(moveMonth(2026,12,1),{year:2027,month:1});
+ assert.deepEqual(moveMonth(2026,10,-12),{year:2025,month:10});
+ assert.deepEqual(moveMonth(2026,10,12),{year:2027,month:10});
+});
+test('assessment list groups by employee without losing records',()=>{
+ const employees=[{id:'a',name:'Alex Rivera',site:'Santa Monica',status:'active'},
+                  {id:'b',name:'Morgan Chen',site:'Beverly Hills Satellite',status:'active'}];
+ const enrollments=[{id:'e1',employee_id:'a'},{id:'e2',employee_id:'b'}];
+ const records=[
+  {id:'a1',enrollment_id:'e1',due_date:'2026-11-02',completed_at:null},
+  {id:'a2',enrollment_id:'e1',due_date:'2026-10-20',completed_at:null},
+  {id:'a3',enrollment_id:'e1',due_date:'2026-09-01',completed_at:'2026-09-01T00:00:00Z'},
+  {id:'b1',enrollment_id:'e2',due_date:'2026-10-01',completed_at:null}
+ ];
+ const en=id=>enrollments.find(x=>x.id===id);
+ const em=id=>employees.find(x=>x.id===id);
+ const urgent=groupAssessmentRecords(records,en,em,'deadline','2026-10-27');
+ assert.equal(urgent.length,2);
+ assert.equal(urgent.reduce((sum,group)=>sum+group.records.length,0),records.length);
+ assert.equal(urgent[0].employee.name,'Morgan Chen');
+ assert.equal(urgent[0].overdue,1);
+ assert.equal(urgent[1].employee.name,'Alex Rivera');
+ assert.equal(urgent[1].overdue,1);
+ assert.equal(urgent[1].dueSoon,1);
+ assert.equal(urgent[1].completed,1);
+ assert.deepEqual(urgent[1].records.map(r=>r.id),['a2','a1','a3']);
+ assert.deepEqual(groupAssessmentRecords(records,en,em,'name','2026-10-27').map(g=>g.employee.name),['Alex Rivera','Morgan Chen']);
+ assert.deepEqual(groupAssessmentRecords(records,en,em,'site','2026-10-27').map(g=>g.employee.name),['Morgan Chen','Alex Rivera']);
+ const filtered=groupAssessmentRecords(records.filter(r=>r.id==='a2'),en,em,'deadline','2026-10-27');
+ assert.equal(filtered.length,1);assert.equal(filtered[0].records.length,1);
 });
