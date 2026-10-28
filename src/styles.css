@@ -132,3 +132,108 @@
 .form-actions>.button.modal-close{width:auto!important;height:auto!important;min-width:95px;min-height:42px;flex:0 1 auto;padding:11px 18px!important;font-size:12px!important;line-height:1.25;background:#fff!important;border:1px solid #d5e4e9!important;color:#35586a!important;border-radius:9px;text-align:center;box-shadow:none}
 .form-actions>.button.modal-close:hover{background:#f0f8f6!important;border-color:#9bcac0!important}
 @media(max-width:520px){.form-actions>.button.modal-close{width:100%!important;flex:1 1 100%}}
+
+/* Custom dates: website calendar, never the browser's OS date popover. */
+.app-date-host{position:relative;width:100%;min-width:0}
+.app-date-host input[type="date"][data-app-date]{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;padding:0!important;border:0!important;left:0;top:0;min-width:0;overflow:hidden}
+.app-date-trigger{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;padding:11px 14px;background:#fff;border:1px solid #d8e4e9;border-radius:10px;color:#2d4d60;text-align:left;font-size:12px;font-weight:700;cursor:pointer;transition:box-shadow .15s,border .15s,background .15s}
+.app-date-trigger:hover{border-color:#77c4b8;background:#fbfefd}
+.app-date-trigger:focus-visible,.app-date-trigger.is-open{outline:none;border-color:#17a699;box-shadow:0 0 0 3px #0a9b8b21}
+.app-date-trigger:disabled{opacity:.5;cursor:not-allowed;background:#f2f5f6}
+.app-date-trigger.is-placeholder .app-date-text{color:#8b9fa9}
+.app-date-icon{display:grid;place-items:center;min-width:26px;height:26px;border-radius:7px;background:#e9f6f2;color:#148e83;font-size:17px;line-height:1}
+.app-calendar{position:fixed;z-index:1600;overflow-y:auto;background:#fff;border:1px solid #d2e3e3;border-radius:15px;box-shadow:0 20px 50px #0d2b3d35;padding:13px;font-family:inherit;overscroll-behavior:contain}
+.app-calendar-header{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+.app-calendar-title{flex:1;text-align:center;color:#1b4354;font-size:13px;font-weight:900}
+.app-calendar-nav{height:33px;width:33px;border:1px solid #e1e9eb;background:#f6faf9;color:#477286;border-radius:9px;font-size:25px;display:grid;place-items:center;line-height:1;cursor:pointer}
+.app-calendar-nav:hover,.app-calendar-nav:focus-visible{outline:0;background:#e8f7f3;border-color:#93cdbd;color:#078a7d}
+.app-calendar-weekdays,.app-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center}
+.app-calendar-weekdays{margin-bottom:6px}
+.app-calendar-weekdays span{font-size:10px;font-weight:800;color:#95a4ae;padding:6px 0}
+.app-calendar-blank{height:34px}
+.app-calendar-day{width:100%;aspect-ratio:1;max-height:36px;min-height:31px;border:1px solid transparent;border-radius:9px;display:grid;place-items:center;background:transparent;color:#2a4658;font-size:12px;font-weight:600;cursor:pointer}
+.app-calendar-day:hover:not(:disabled),.app-calendar-day:focus-visible{outline:0;background:#e5f6f1;color:#0c7a70}
+.app-calendar-day.today{border-color:#95d5c8;color:#087f73;font-weight:900}
+.app-calendar-day.selected{background:#0a9184;color:#fff;border-color:#0a9184;box-shadow:0 3px 9px #098d8022}
+.app-calendar-day:disabled{color:#bdc9cc;opacity:.45;cursor:not-allowed}
+.app-calendar-footer{border-top:1px solid #ecf1f3;display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding:9px 4px 0}
+.app-calendar-text-button{border:0;border-radius:7px;background:transparent;color:#0b8e82;font-size:11px;font-weight:900;padding:7px 10px;cursor:pointer}
+.app-calendar-text-button:hover{background:#e9f7f3}
+.app-calendar-text-button:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:370px){.app-calendar{padding:9px}.app-calendar-day{min-height:29px}}
+
+/* Employee-centric competency tracker, with one condensed Sort & Filter menu. */
+.comp-toolbar{display:flex;gap:11px;align-items:stretch;margin-bottom:13px}
+.comp-toolbar .search-box{min-height:46px}
+.comp-filter-button{min-height:46px;min-width:157px;white-space:nowrap;justify-content:center;gap:9px}
+.comp-filter-button.has-filters{background:#eaf7f4;border-color:#a8dacc;color:#087c72}
+.comp-filter-count{display:grid;place-items:center;min-width:19px;height:19px;padding:0 5px;background:#108c7e;border-radius:20px;color:#fff;font-size:10px}
+.comp-control-chevron{font-size:16px;color:#7899a4;margin-left:6px}
+.comp-filter-panel{background:#fff;border:1px solid #dce9e9;border-radius:12px;box-shadow:0 7px 24px #1749570d;padding:20px 20px 14px;margin:0 0 18px}
+.comp-filter-panel[hidden]{display:none!important}
+.comp-filter-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.comp-filter-grid .field{margin:0;min-width:0}
+.comp-filter-grid .app-select-host{width:100%}
+.comp-filter-grid .field>span{font-size:10px}
+.comp-filter-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid #edf2f3;padding-top:13px;margin-top:15px;color:#8496a2;font-size:11px}
+.comp-directory{overflow:hidden}
+.comp-directory-header{padding:21px 22px 18px;gap:12px;flex-wrap:wrap}
+.comp-directory-actions{display:flex;align-items:center;gap:8px}
+.comp-text-action{border:0;background:transparent;color:#0b877b;font-size:11px;font-weight:800;cursor:pointer;padding:7px 5px;border-radius:6px}
+.comp-text-action:hover{background:#eaf6f3}
+.comp-text-action:focus-visible{outline:2px solid #6bc4b5;outline-offset:2px}
+.comp-separator{color:#a8bbc2}
+.comp-groups{display:grid;gap:10px;padding:0 17px 19px}
+.comp-employee-card{border:1px solid #dfe8eb;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 1px 3px #1e465708}
+.comp-employee-card.expanded{border-color:#a9d9ce;box-shadow:0 2px 10px #13897910}
+.comp-employee-toggle{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:16px 18px;border:0;background:#fff;cursor:pointer;transition:background .15s}
+.comp-employee-toggle:hover{background:#f7fbfa}
+.comp-employee-toggle:focus-visible{outline:2px solid #149e90;outline-offset:-3px}
+.comp-employee-card.expanded>.comp-employee-toggle{background:#f4faf8;border-bottom:1px solid #dcece8}
+.comp-employee-toggle .initial-avatar{flex:0 0 40px;width:40px;height:40px;display:grid;place-items:center}
+.comp-employee-info{flex:1;min-width:120px}
+.comp-employee-info>strong{display:block;font-size:13px;color:#203e4e;font-weight:900}
+.comp-employee-info>small{display:block;font-size:11px;color:#859eab;font-weight:600;margin-top:5px}
+.comp-employee-stats{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px}
+.comp-stat{display:inline-flex;align-items:center;gap:5px;border-radius:7px;padding:5px 8px;font-size:10px;font-weight:700;white-space:nowrap;color:#6e8290;background:#f0f4f6}
+.comp-stat b{font-weight:900}
+.comp-stat.overdue{background:#fff0ef;color:#c44247}
+.comp-stat.due{background:#fff7e5;color:#ae7529}
+.comp-stat.complete{background:#eaf8f2;color:#12815a}
+.comp-stat.total{background:#eef3f6;color:#617e8b}
+.comp-employee-chevron{display:grid;place-items:center;flex:0 0 26px;width:26px;height:26px;border:1px solid #d7e6e9;border-radius:8px;color:#668695;font-size:20px;line-height:1;transition:transform .2s,background .2s;margin-left:8px}
+.comp-employee-card.expanded .comp-employee-chevron{transform:rotate(180deg);background:#e0f3ef;border-color:#a5d8ce;color:#087e73}
+.comp-employee-body[hidden]{display:none!important}
+.comp-employee-subhead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 18px;background:#fff;color:#91a0a9;font-size:10px;font-weight:700}
+.comp-profile-link{border:0;background:transparent;border-radius:6px;color:#108c7f;padding:6px 8px;font-weight:800;font-size:11px;cursor:pointer}
+.comp-profile-link:hover{background:#edf8f5}
+.comp-assessment-table{width:100%;border-collapse:collapse}
+.comp-assessment-table th{background:#f8fafb;font-size:10px;color:#8398a6;letter-spacing:.08em}
+.comp-assessment-table th,.comp-assessment-table td{padding:12px 16px}
+.comp-assessment-table td{border-top:1px solid #edf1f3;vertical-align:middle;font-size:11px}
+.comp-assessment-table .comp-platform{font-size:11px;color:#355362;font-weight:800}
+.comp-platform small,.comp-date small{display:block;margin-top:4px;font-size:10px;font-weight:500;color:#96a4ae}
+.comp-date small.danger-text{font-weight:700;color:#cc4849}
+.comp-open-record{border:1px solid #d8e8e6;background:#fff;color:#0b857c;white-space:nowrap;font-size:11px;font-weight:800;border-radius:8px;padding:8px 11px;cursor:pointer}
+.comp-open-record:hover,.comp-open-record:focus-visible{background:#e7f6f2;border-color:#8bcabf;outline:0}
+.comp-open-record span{padding-left:4px;font-size:13px}
+@media(max-width:1120px){.comp-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){
+ .comp-toolbar{flex-wrap:wrap}
+ .comp-toolbar>.search-box{flex-basis:100%}
+ .comp-filter-button{width:100%}
+ .comp-filter-grid{grid-template-columns:1fr 1fr}
+ .comp-employee-toggle{flex-wrap:wrap;gap:10px;padding:12px}
+ .comp-employee-stats{order:3;width:100%;justify-content:flex-start;padding-left:49px}
+ .comp-employee-chevron{margin-left:auto}
+ .comp-assessment-table{min-width:620px}
+ .comp-filter-footer{flex-wrap:wrap}
+ .comp-employee-subhead{flex-wrap:wrap}
+}
+@media(max-width:450px){
+ .comp-filter-grid{grid-template-columns:1fr}
+ .comp-groups{padding:0 9px 12px}
+ .comp-employee-info{min-width:0}
+ .comp-employee-info>small{font-size:10px}
+ .comp-employee-stats{padding-left:0}
+}
